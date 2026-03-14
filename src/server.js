@@ -6,7 +6,7 @@ const app = require("./app");
 async function main() {
   await mongoose.connect(env.mongodbUri);
   app.listen(env.port, () => {
-    console.log(`AlgoForge API listening on port ${env.port}`);
+    console.log(`AlgoForge API listening on port ...${env.port}`);
   });
 }
 

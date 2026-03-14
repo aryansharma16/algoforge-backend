@@ -17,4 +17,10 @@ const getUserDetails = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
-module.exports = { register, login, getUserDetails };
+/** PATCH current user — editable profile fields only; email not allowed. */
+const patchMe = asyncHandler(async (req, res) => {
+  const user = await authService.updateProfile(req.userId, req.body);
+  res.json(user);
+});
+
+module.exports = { register, login, getUserDetails, patchMe };

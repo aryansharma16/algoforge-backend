@@ -24,6 +24,36 @@ const workExperienceSchema = new mongoose.Schema(
   { _id: false }
 );
 
+/**
+ * Social / coding profiles: type + url (e.g. linkedin, github, leetcode, gfg).
+ * type: short id for UI icons; url: full profile link.
+ */
+const socialProfileSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      maxlength: 32,
+      /** Common: linkedin | github | leetcode | gfg | codeforces | website | other */
+    },
+    url: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 2000,
+    },
+    label: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 80,
+    },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -32,6 +62,19 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: 2,
       maxlength: 64,
+    },
+    /** Public-facing name (can differ from username). */
+    displayName: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 120,
+    },
+    bio: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 2000,
     },
     email: {
       type: String,
@@ -114,6 +157,14 @@ const userSchema = new mongoose.Schema(
       default: "",
       trim: true,
       maxlength: 200,
+    },
+    socialProfiles: {
+      type: [socialProfileSchema],
+      default: [],
+      validate: [
+        (arr) => arr.length <= 20,
+        "At most 20 social profile entries",
+      ],
     },
   },
   {

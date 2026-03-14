@@ -17,6 +17,18 @@ const SUBMISSION_RESULTS = [
   "partial",
 ];
 
+/** UI flag color kind (maps to badge/flag styling on the client) */
+const SUBMISSION_FLAG_COLORS = [
+  "none",
+  "gray",
+  "blue",
+  "green",
+  "yellow",
+  "orange",
+  "red",
+  "purple",
+];
+
 const submissionSchema = new mongoose.Schema(
   {
     userId: {
@@ -102,6 +114,13 @@ const submissionSchema = new mongoose.Schema(
       default: "unspecified",
       index: true,
     },
+    /** Which flag color to show for this submission (success, warning, etc.) */
+    flagColor: {
+      type: String,
+      enum: SUBMISSION_FLAG_COLORS,
+      default: "none",
+      index: true,
+    },
     score: {
       type: Number,
       min: 0,
@@ -171,3 +190,4 @@ const Submission = mongoose.model("Submission", submissionSchema);
 module.exports = Submission;
 module.exports.SOLVING_METHODS = SOLVING_METHODS;
 module.exports.SUBMISSION_RESULTS = SUBMISSION_RESULTS;
+module.exports.SUBMISSION_FLAG_COLORS = SUBMISSION_FLAG_COLORS;

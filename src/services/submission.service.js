@@ -16,15 +16,18 @@ async function syncItemSubmissionStats(itemId) {
     .sort({ createdAt: -1 })
     .select("createdAt")
     .lean();
-  await LearningItem.updateOne(
-    { _id: itemId },
-    {
-      $set: {
-        submissionCount: count,
-        ...(last ? { lastSubmissionAt: last.createdAt } : { lastSubmissionAt: null }),
-      },
+  const $set = {
+    submissionCount: count,
+    ...(last ? { lastSubmissionAt: last.createdAt } : { lastSubmissionAt: null }),
+  };
+  /** If submissions drop below 3, no longer auto-completed by submission count. */
+  if (count < 3) {
+    const item = await LearningItem.findById(itemId).select("status").lean();
+    if (item && item.status === "completed") {
+      $set.status = count === 0 ? "pending" : "in_progress";
     }
-  );
+  }
+  await LearningItem.updateOne({ _id: itemId }, { $set });
 }
 
 async function listSubmissions(userId, journeyId, itemId) {
@@ -72,6 +75,7 @@ async function createSubmission(userId, journeyId, itemId, body) {
     title: body.title ?? "",
     tags: body.tags ?? [],
     resultStatus: body.resultStatus,
+    flagColor: body.flagColor ?? "none",
     score: body.score,
     durationSeconds: body.durationSeconds,
     runtimeMs: body.runtimeMs,
@@ -85,13 +89,17 @@ async function createSubmission(userId, journeyId, itemId, body) {
     metadata: body.metadata ?? {},
   });
 
-  await LearningItem.updateOne(
-    { _id: itemId },
-    {
-      $inc: { submissionCount: 1 },
-      $set: { lastSubmissionAt: doc.createdAt },
-    }
-  );
+  const newCount = await Submission.countDocuments({ itemId });
+  const item = await LearningItem.findById(itemId).select("status").lean();
+  const $set = { lastSubmissionAt: doc.createdAt, submissionCount: newCount };
+
+  if (newCount >= 3) {
+    $set.status = "completed";
+  } else if (newCount === 1 && item && item.status === "pending") {
+    $set.status = "in_progress";
+  }
+
+  await LearningItem.updateOne({ _id: itemId }, { $set });
   await journeyService.touchJourneyActivity(journeyId);
 
   return doc.toObject();
@@ -109,6 +117,7 @@ const UPDATE_SUBMISSION_FIELDS = [
   "title",
   "tags",
   "resultStatus",
+  "flagColor",
   "score",
   "durationSeconds",
   "runtimeMs",
