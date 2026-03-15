@@ -9,7 +9,7 @@ const dashboardController = require("./controllers/dashboard.controller");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (req, res) => {
