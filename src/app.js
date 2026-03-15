@@ -12,10 +12,13 @@ const app = express();
 app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true });
-});
-
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://algoforge-frontend.vercel.app"
+  ],
+  credentials: true
+}));
 /*
  * Auth: define every path on `app` — do NOT use app.use("/api/auth", router).
  * A mounted router at "/api/auth" runs first for all /api/auth/* URLs; if anything
