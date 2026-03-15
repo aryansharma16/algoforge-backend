@@ -9,9 +9,6 @@ const dashboardController = require("./controllers/dashboard.controller");
 
 const app = express();
 
-app.use(cors({ origin: "*", credentials: true }));
-app.use(express.json({ limit: "1mb" }));
-
 app.use(cors({
   origin: [
     "http://localhost:5173",
@@ -19,6 +16,7 @@ app.use(cors({
   ],
   credentials: true
 }));
+app.use(express.json({ limit: "1mb" }));
 /*
  * Auth: define every path on `app` — do NOT use app.use("/api/auth", router).
  * A mounted router at "/api/auth" runs first for all /api/auth/* URLs; if anything
